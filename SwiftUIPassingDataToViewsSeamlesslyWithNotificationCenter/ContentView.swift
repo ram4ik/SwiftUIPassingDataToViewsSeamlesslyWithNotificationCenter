@@ -9,13 +9,25 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            VStack {
+                ReceiverView()
+                SenderView()
+            }
+            .navigationTitle("Passing data to Views")
         }
-        .padding()
+    }
+}
+
+struct ReceiverView: View {
+    var body: some View {
+        Text("")
+    }
+}
+
+struct SenderView: View {
+    var body: some View {
+        Text("")
     }
 }
 
