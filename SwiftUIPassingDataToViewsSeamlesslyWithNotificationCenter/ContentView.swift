@@ -20,8 +20,29 @@ struct ContentView: View {
 }
 
 struct ReceiverView: View {
+    @State private var counter = 0
+    
     var body: some View {
-        Text("")
+        ZStack {
+            Color.mint.opacity(0.2)
+            Text("Received **\(counter)** notifications.")
+        }
+        .onAppear() {
+            Task(priority: .background) {
+                await receiveNotifications()
+            }
+        }
+    }
+    
+    private func receiveNotifications() async {
+        let center = NotificationCenter.default
+        let name = Notification.Name("RIAlert")
+        
+        for await _ in center.notifications(named: name) {
+            await MainActor.run {
+                counter += 1
+            }
+        }
     }
 }
 
