@@ -45,10 +45,10 @@ struct ReceiverView: View {
         let name = Notification.Name("RIAlert")
         
         for await notification in center.notifications(named: name) {
-            if let userInfo = notification.userInfo, let moreInfo = userInfo["Language"] as? String {
+            if let userInfo = notification.userInfo, let moreInfo = userInfo["Language"] as? Language {
                 
                 await MainActor.run {
-                    additionalInfo = moreInfo
+                    additionalInfo = "\(moreInfo.name)"
                 }
             }
             
@@ -67,12 +67,18 @@ struct SenderView: View {
                 let center = NotificationCenter.default
                 let name = Notification.Name("RIAlert")
                 
-                let additionalInfo = ["Language": "Swift"]
+                let language = Language(name: "Swift")
+                
+                let additionalInfo = ["Language": language]
                 
                 center.post(name: name, object: nil, userInfo: additionalInfo)
             }
         }
     }
+}
+
+struct Language: Codable {
+    var name: String
 }
 
 #Preview {
