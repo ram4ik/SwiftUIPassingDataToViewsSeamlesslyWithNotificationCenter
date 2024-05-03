@@ -21,11 +21,17 @@ struct ContentView: View {
 
 struct ReceiverView: View {
     @State private var counter = 0
+    @State private var additionalInfo = ""
     
     var body: some View {
         ZStack {
             Color.mint.opacity(0.2)
-            Text("Received **\(counter)** notifications.")
+            VStack {
+                Text("Received **\(counter)** notifications.")
+                if !additionalInfo.isEmpty {
+                    Text("*\(additionalInfo)*")
+                }
+            }
         }
         .onAppear() {
             Task(priority: .background) {
@@ -38,7 +44,14 @@ struct ReceiverView: View {
         let center = NotificationCenter.default
         let name = Notification.Name("RIAlert")
         
-        for await _ in center.notifications(named: name) {
+        for await notification in center.notifications(named: name) {
+            if let userInfo = notification.userInfo, let moreInfo = userInfo["Language"] as? String {
+                
+                await MainActor.run {
+                    additionalInfo = moreInfo
+                }
+            }
+            
             await MainActor.run {
                 counter += 1
             }
@@ -54,7 +67,9 @@ struct SenderView: View {
                 let center = NotificationCenter.default
                 let name = Notification.Name("RIAlert")
                 
-                center.post(name: name, object: nil)
+                let additionalInfo = ["Language": "Swift"]
+                
+                center.post(name: name, object: nil, userInfo: additionalInfo)
             }
         }
     }
