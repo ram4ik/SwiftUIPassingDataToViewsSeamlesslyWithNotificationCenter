@@ -27,7 +27,15 @@ struct ReceiverView: View {
 
 struct SenderView: View {
     var body: some View {
-        Text("")
+        ZStack {
+            Color.orange.opacity(0.2)
+            Button("Send Notification") {
+                let center = NotificationCenter.default
+                let name = Notification.Name("RIAlert")
+                
+                center.post(name: name, object: nil)
+            }
+        }
     }
 }
 
