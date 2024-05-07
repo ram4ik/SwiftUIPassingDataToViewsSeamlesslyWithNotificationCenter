@@ -8,13 +8,20 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var systemNotification = SystemNotificationExample()
+    
     var body: some View {
+        var layout = systemNotification.orientation == .portrait ? AnyLayout(VStackLayout()) : AnyLayout(HStackLayout())
+        
         NavigationStack {
             VStack {
                 ReceiverView()
                 SenderView()
             }
             .navigationTitle("Passing data to Views")
+            .onChange(of: systemNotification.orientation) { oldValue, newValue in
+                print(oldValue, " -> ", newValue)
+            }
         }
     }
 }
@@ -80,6 +87,39 @@ struct SenderView: View {
 struct Language: Codable {
     var name: String
 }
+
+enum Orientation {
+    case portrait
+    case landscape
+}
+
+import Observation
+final class SystemNotificationExample {
+    let center = NotificationCenter.default
+    var orientation = Orientation.portrait
+    
+    init() {
+        Task(priority: .background) {
+            await orientationChangeNotification()
+        }
+    }
+    
+    @MainActor
+    func orientationChangeNotification() async {
+        let name = UIDevice.orientationDidChangeNotification
+        for await notification in center.notifications(named: name) {
+            if let device = notification.object as? UIDevice {
+                if device.orientation.isPortrait {
+                    orientation = .portrait
+                } else {
+                    orientation = .landscape
+                }
+            }
+        }
+    }
+}
+
+extension Notification: @unchecked Sendable {}
 
 #Preview {
     ContentView()
